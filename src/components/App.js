@@ -1,16 +1,19 @@
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Main from '../components/Main';
 import Footer from '../components/Footer';
 import ImagePopup from '../components/ImagePopup';
 import api from '../utils/Api';
-import Card from '../components/Card';
 import { CurrentUserContext } from '../contexts/CurrentUserContext';
 import EditProfilePopup from '../components/EditProfilePopup';
 import EditAvatarPopup from '../components/EditAvatarPopup';
 import AddPlacePopup from './AddPlacePopup ';
 import ConfirmationPopup from './ConfirmationPopup';
 import avatar from '../images/avatar.png';
+import Login from './Login';
+import Register from './Register';
 
 function App() {
 
@@ -189,23 +192,26 @@ function handleCardDelete(card) {
     <CurrentUserContext.Provider value={currentUser}>
       <div className='page'>
         <Header />
-        <Main
-          onEditProfile={handleEditProfileClick}
-          onAddPlace={handleAddPlaceClick}
-          onEditAvatar={handleEditAvatarClick}
-          userName={currentUser.name}
-          userDescription={currentUser.about} 
-          userAvatar={currentUser.avatar} >
-            {cards.map((item) => (
-              <Card
-                key={item._id}
-                card={item}
-                onCardClick={handleCardClick}
-                onCardLike={handleCardLike}
-                onDeleteClick={handleDeleteClick}
-              />
-            ))}
-          </Main>
+        <Routes>
+          <Route 
+            path='/mesto-react-auth' 
+            element={
+              <Main
+                onEditProfile={handleEditProfileClick}
+                onAddPlace={handleAddPlaceClick}
+                onEditAvatar={handleEditAvatarClick}
+                userName={currentUser.name}
+                userDescription={currentUser.about} 
+                userAvatar={currentUser.avatar}
+                cards={cards}
+                handleCardClick={handleCardClick}
+                handleCardLike={handleCardLike}
+                handleDeleteClick={handleDeleteClick}
+              />}
+            />
+          <Route path='/sign-up' element={<Register />} />
+          <Route path='/sign-in' element={<Login />} />
+        </Routes>
         <Footer />
         <ImagePopup
           card={selectedCard} 

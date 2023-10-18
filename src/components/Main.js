@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useContext } from "react";
 import { CurrentUserContext } from "../contexts/CurrentUserContext";
+import Card from "./Card";
 
-function Main ({onEditProfile, onAddPlace, onEditAvatar, children}) {
+function Main ({onEditProfile, onAddPlace, onEditAvatar, cards, handleCardClick, handleCardLike, handleDeleteClick }) {
 
-   const currentUser = React.useContext(CurrentUserContext);
+   const currentUser = useContext(CurrentUserContext);
 
    return (
       <main>
@@ -39,7 +40,15 @@ function Main ({onEditProfile, onAddPlace, onEditAvatar, children}) {
             />
          </section>
          <section className="elements">
-            {children}
+            {cards.map((item) => (
+               <Card
+                  key={item._id}
+                  card={item}
+                  onCardClick={handleCardClick}
+                  onCardLike={handleCardLike}
+                  onDeleteClick={handleDeleteClick}
+               />
+            ))}
          </section>
       </main>
    )
