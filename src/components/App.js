@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Main from '../components/Main';
@@ -14,6 +14,7 @@ import ConfirmationPopup from './ConfirmationPopup';
 import avatar from '../images/avatar.png';
 import Login from './Login';
 import Register from './Register';
+import ProtectedRouteElement from './ProtectedRoute';
 
 function App() {
 
@@ -34,6 +35,20 @@ function App() {
 
   const [cards, setCards] = useState([]);
   const [selectedCard, setSelectedCard] = useState(null);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [formValue, setFormValue] = useState({
+    email: '',
+    password: ''
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormValue({
+      ...formValue,
+      [name]: value
+    });
+  }
 
   function handleEditProfileClick() {
     setIsEditProfilePopupOpen(true);
@@ -188,15 +203,20 @@ function handleCardDelete(card) {
       })
   }
 
+  const handleLoggedIn = () => {
+    setLoggedIn(true);
+  }
+
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className='page'>
         <Header />
         <Routes>
+          <Route path='/mesto-react' element={loggedIn ? <Navigate to="/" replace /> : <Navigate to="/sign-up" replace />} />
           <Route 
-            path='/mesto-react-auth' 
+            path='/' 
             element={
-              <Main
+              <ProtectedRouteElement
                 onEditProfile={handleEditProfileClick}
                 onAddPlace={handleAddPlaceClick}
                 onEditAvatar={handleEditAvatarClick}
@@ -207,10 +227,25 @@ function handleCardDelete(card) {
                 handleCardClick={handleCardClick}
                 handleCardLike={handleCardLike}
                 handleDeleteClick={handleDeleteClick}
+                loggedIn={loggedIn}
+                element={Main}
               />}
             />
-          <Route path='/sign-up' element={<Register />} />
-          <Route path='/sign-in' element={<Login />} />
+          <Route 
+            path='/sign-up' 
+            element={<Register
+            formValue={formValue}
+            handleChange={handleChange}  
+          />} />
+          <Route 
+            path='/sign-in' 
+            element={<Login
+            formValue={formValue}
+            setFormValue={setFormValue}
+            handleChange={handleChange}
+            handleLoggedIn={handleLoggedIn}
+            />} />
+          <Route path='*' element={loggedIn ? <Navigate to="/" /> : <Navigate to="/sign-up" />} />
         </Routes>
         <Footer />
         <ImagePopup
