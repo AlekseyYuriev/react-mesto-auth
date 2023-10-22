@@ -8,20 +8,19 @@ export const register = (password, email) => {
          "Content-Type": "application/json"
       },
       body: JSON.stringify({password, email})
-   })
-   .then((response) => {
+   }).then((response) => {
       try {
-         if (response.status === 200){
+         if (response.ok){
             return response.json();
          }
       } catch(e){
          return (e)
       }
-   })
-   .then((res) => {
+   }).then((res) => {
       return res;
-   })
-   .catch((err) => console.log(err));
+   }).catch((err) => {
+      return err;
+   });
 }
 
 export const login = (email, password) => {
@@ -40,4 +39,16 @@ export const login = (email, password) => {
       }
    })
    .catch(err => console.log(err))
+}
+
+export const checkToken = (token) => {
+   return fetch(`${BASE_URL}/users/me`, {
+      method: 'GET',
+      headers: {
+         "Content-Type": "application/json",
+         "Authorization" : `Bearer ${token}`,
+      }
+   })
+   .then(res => res.json())
+   .then(data => data)
 }

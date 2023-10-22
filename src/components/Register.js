@@ -3,7 +3,7 @@ import AuthForm from "./AuthForm";
 import * as MestoAuth from '../utils/MestoAuth';
 import { Link, useNavigate } from "react-router-dom";
 
-function Register ( {formValue, handleChange} ) {
+function Register ({ formValue, handleChange, setIsAuthComplete, setIsInfoTooltipOpen, setFormValue, setEmail }) {
 
    const navigate = useNavigate();
 
@@ -11,9 +11,18 @@ function Register ( {formValue, handleChange} ) {
       e.preventDefault();
 
       const { password, email } = formValue;
-      MestoAuth.register(password, email).then((res) => {
-         navigate('/sign-in', {replace: true});
-      })
+      MestoAuth.register(password, email)
+         .then((res) => {
+            setEmail(res.data.email);
+            setFormValue({ email: '', password: '' })
+            navigate('/sign-in', {replace: true});
+            setIsAuthComplete(true);
+            setIsInfoTooltipOpen(true);
+         })
+         .catch(() => {
+            setIsAuthComplete(false);
+            setIsInfoTooltipOpen(true);
+         })
    }
 
 

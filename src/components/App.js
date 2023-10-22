@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Main from '../components/Main';
@@ -12,9 +12,13 @@ import EditAvatarPopup from '../components/EditAvatarPopup';
 import AddPlacePopup from './AddPlacePopup ';
 import ConfirmationPopup from './ConfirmationPopup';
 import avatar from '../images/avatar.png';
+import union from '../images/Union.png';
+import unionErr from '../images/UnionErr.png';
 import Login from './Login';
 import Register from './Register';
 import ProtectedRouteElement from './ProtectedRoute';
+import * as MestoAuth from '../utils/MestoAuth';
+import InfoTooltip from './InfoTooltip';
 
 function App() {
 
@@ -25,6 +29,7 @@ function App() {
     isOpen: false,
     card: {}
   });
+  const [isInfoTooltipOpen, setIsInfoTooltipOpen] = useState(false);
   const [submitButtonState, setSubmitButtonState] = useState('');
 
   const [currentUser, setcurrentUser] = useState({
@@ -40,6 +45,45 @@ function App() {
     email: '',
     password: ''
   });
+  const [email, setEmail] = useState('');
+  const [isAuthComplete, setIsAuthComplete] = useState(false);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    api.getUserData()
+      .then((currentUser) => {
+        setcurrentUser(currentUser);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+  
+    api.getInitialCards()
+      .then((res) => {
+        setCards(res);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+
+    tokenCheck();
+  }, [])
+
+  const tokenCheck = () => {
+    if (localStorage.getItem('token')) {
+      const token = localStorage.getItem('token');
+      MestoAuth.checkToken(token)
+        .then((res) => {
+            setLoggedIn(true);
+            setEmail(res.data.email);
+            navigate('/', {replace: true});
+        })
+        .catch((err) => {
+          console.log(err);
+        })
+      }
+    }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -48,6 +92,22 @@ function App() {
       ...formValue,
       [name]: value
     });
+  }
+
+  const signOut = () => {
+    localStorage.removeItem('token');
+    handleLoggedIn(false);
+    navigate('/sign-in', {replace: true});
+  }
+
+  const goToRegistration = () => {
+    navigate('/sign-up', {replace: false})
+    setFormValue({email: '', password: ''});
+  }
+
+  const goToLogin = () => {
+      navigate('/sign-in', {replace: false})
+      setFormValue({email: '', password: ''});
   }
 
   function handleEditProfileClick() {
@@ -78,6 +138,7 @@ function App() {
     setIsAddPlacePopupOpen(false);
     setIsEditAvatarPopupOpen(false);
     setIsConfirmationPopupOpen(false);
+    setIsInfoTooltipOpen(false);
     setSelectedCard(null);
   }
 
@@ -88,12 +149,12 @@ function App() {
   }
 
   useEffect(()=>{
-    if(isEditAvatarPopupOpen || isEditProfilePopupOpen || isAddPlacePopupOpen || isConfirmationPopupOpen.isOpen || selectedCard){
+    if(isEditAvatarPopupOpen || isEditProfilePopupOpen || isAddPlacePopupOpen || isConfirmationPopupOpen.isOpen || selectedCard || isInfoTooltipOpen){
       document.addEventListener('keydown', closeByEsc);
     }else{
       document.removeEventListener('keydown', closeByEsc);
     }    
-  },[isEditAvatarPopupOpen, isEditProfilePopupOpen, isAddPlacePopupOpen, isConfirmationPopupOpen.isOpen, selectedCard, closeByEsc]);
+  },[isEditAvatarPopupOpen, isEditProfilePopupOpen, isAddPlacePopupOpen, isConfirmationPopupOpen.isOpen, selectedCard, closeByEsc, isInfoTooltipOpen]);
 
   function handleCardClick(card) {
     setSelectedCard(card);
@@ -137,26 +198,6 @@ function handleCardDelete(card) {
       setSubmitButtonState('Да');
     })
 }
-
-  useEffect(() => {
-    api.getUserData()
-      .then((currentUser) => {
-        setcurrentUser(currentUser);
-      })
-      .catch((err) => {
-        console.log(err);
-      })
-  }, []);
-
-  useEffect(() => {
-    api.getInitialCards()
-      .then((res) => {
-        setCards(res);
-      })
-      .catch((err) => {
-        console.log(err);
-      })
-  }, []);
 
   const handleUpdateUser = (userInfo) => {
     setSubmitButtonState('Сохранение...');
@@ -203,14 +244,20 @@ function handleCardDelete(card) {
       })
   }
 
-  const handleLoggedIn = () => {
-    setLoggedIn(true);
+  function handleLoggedIn (isLogged) {
+    setLoggedIn(isLogged);
   }
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className='page'>
-        <Header />
+        <Header
+          userEmail={email}
+          signOut={signOut}
+          loggedIn={loggedIn}
+          goToRegistration={goToRegistration}
+          goToLogin={goToLogin}
+        />
         <Routes>
           <Route path='/mesto-react' element={loggedIn ? <Navigate to="/" replace /> : <Navigate to="/sign-up" replace />} />
           <Route 
@@ -235,7 +282,11 @@ function handleCardDelete(card) {
             path='/sign-up' 
             element={<Register
             formValue={formValue}
-            handleChange={handleChange}  
+            handleChange={handleChange}
+            setIsAuthComplete={setIsAuthComplete}
+            setIsInfoTooltipOpen={setIsInfoTooltipOpen}
+            setFormValue={setFormValue}
+            setEmail={setEmail}
           />} />
           <Route 
             path='/sign-in' 
@@ -244,6 +295,9 @@ function handleCardDelete(card) {
             setFormValue={setFormValue}
             handleChange={handleChange}
             handleLoggedIn={handleLoggedIn}
+            setEmail={setEmail}
+            setIsAuthComplete={setIsAuthComplete}
+            setIsInfoTooltipOpen={setIsInfoTooltipOpen}
             />} />
           <Route path='*' element={loggedIn ? <Navigate to="/" /> : <Navigate to="/sign-up" />} />
         </Routes>
@@ -276,6 +330,13 @@ function handleCardDelete(card) {
           onClose={closeAllPopups} 
           onUpdateAvatar={handleUpdateAvatar}
           buttonState={submitButtonState} 
+        />
+        <InfoTooltip
+          isOpen={isInfoTooltipOpen}
+          onClose={closeAllPopups}
+          union={union}
+          unionErr={unionErr}
+          isAuthComplete={isAuthComplete}
         />
       </div>
     </CurrentUserContext.Provider>
