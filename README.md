@@ -13,4 +13,4 @@
 
 **Познакомиться с проектом можно по ссылке:**
 
-* [Mesto-react](https://alekseyyuriev.github.io/react-mesto-auth/)
+* [Mesto-react-auth](https://alekseyyuriev.github.io/react-mesto-auth/)
