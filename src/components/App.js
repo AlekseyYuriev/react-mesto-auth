@@ -51,7 +51,8 @@ function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.getUserData()
+    if(loggedIn) {
+      api.getUserData()
       .then((currentUser) => {
         setcurrentUser(currentUser);
       })
@@ -66,9 +67,10 @@ function App() {
       .catch((err) => {
         console.log(err);
       })
-
+    }
+    
     tokenCheck();
-  }, [])
+  }, [loggedIn])
 
   const tokenCheck = () => {
     if (localStorage.getItem('token')) {
@@ -154,7 +156,7 @@ function App() {
     }else{
       document.removeEventListener('keydown', closeByEsc);
     }    
-  },[isEditAvatarPopupOpen, isEditProfilePopupOpen, isAddPlacePopupOpen, isConfirmationPopupOpen.isOpen, selectedCard, closeByEsc, isInfoTooltipOpen]);
+  },[isEditAvatarPopupOpen, isEditProfilePopupOpen, isAddPlacePopupOpen, isConfirmationPopupOpen.isOpen, selectedCard, isInfoTooltipOpen]);
 
   function handleCardClick(card) {
     setSelectedCard(card);

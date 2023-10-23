@@ -88,6 +88,8 @@ function AddPlacePopup({ isOpen, onClose, onAddPlace, buttonState }) {
                type="text" 
                className="popup__input popup__input_type_card-name" 
                placeholder="Название" 
+               minLength={2}
+               maxLength={30}
                value={name}
                onChange={e => handleNameChange(e)}
                onBlur={e => blurHandler(e)}

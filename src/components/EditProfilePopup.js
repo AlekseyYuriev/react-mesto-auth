@@ -95,7 +95,9 @@ function EditProfilePopup({ isOpen, onClose, onUpdateUser, buttonState }) {
             id="name-input" 
             name="name" 
             type="text" 
-            placeholder="Имя" 
+            placeholder="Имя"
+            minLength={2}
+            maxLength={40}
             className="popup__input popup__input_type_name" 
             value={name}
             onBlur={e => blurHandler(e)}
@@ -110,7 +112,9 @@ function EditProfilePopup({ isOpen, onClose, onUpdateUser, buttonState }) {
             id="about-input" 
             name="about" 
             type="text" 
-            placeholder="О себе" 
+            placeholder="О себе"
+            minLength={2}
+            maxLength={200}
             className="popup__input popup__input_type_description" 
             value={description}
             onBlur={e => blurHandler(e)}
