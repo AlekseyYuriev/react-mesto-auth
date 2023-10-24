@@ -68,9 +68,11 @@ function App() {
         console.log(err);
       })
     }
-    
-    tokenCheck();
   }, [loggedIn])
+
+  useEffect(() => {
+    tokenCheck();
+  }, [])
 
   const tokenCheck = () => {
     if (localStorage.getItem('token')) {
